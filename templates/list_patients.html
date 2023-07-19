@@ -16,7 +16,7 @@
             {% for row in tableData %}
             <tr>
                 <td>{{row['patient_id']}}</td>
-                <td> <a href="http://127.0.0.1:5009/api/v1/getPrescriptions/{{row['patient_id']}}">
+                <td> <a href="http://127.0.0.1:5009/getPrescriptions/{{row['patient_id']}}">
                     {{row['patient_name']}}</a> </td>
             </tr>
             {% endfor %}

@@ -35,7 +35,7 @@ def createPrescription(patient_id):
                data['duration[]'][i], data['reason[]'][i], prescriptions_date)
         mycursor.execute(sql, val)
         mydb.commit()
-    return redirect(f"/api/v1/getPrescriptions/{patient_id}")
+    return redirect(f"/getPrescriptions/{patient_id}")
 
 
 @app.route('/create_prescription/<patient_id>', methods=["GET"])
@@ -44,7 +44,7 @@ def createPrescriptionGet(patient_id):
     return render_template('create_prescription.html', patientId=patient_id)
 
 
-@app.route('/api/v1/getPatients', methods=["GET"])
+@app.route('/getPatients', methods=["GET"])
 def getPatients():
     mycursor.execute("SELECT * FROM patients")
     result = mycursor.fetchall()
@@ -60,7 +60,7 @@ def getPatients():
     return render_template('list_patients.html', headers=headers, tableData=all_patients)
 
 
-@app.route('/api/v1/getPrescriptions/<patient_id>', methods=["GET"])
+@app.route('/getPrescriptions/<patient_id>', methods=["GET"])
 def getPrescriptions(patient_id):
     args = request.args
     print(args)
@@ -82,7 +82,7 @@ def getPrescriptions(patient_id):
                         'reason': object[4],
                         'dateOfIssue': date_of_issue}
         all_prescriptions.append(prescription)
-    headers = ['Description', 'Dosage', 'Frequency', 'Duration', 'Reason', 'Date of Issue']
+    headers = ['Description', 'Dosage', 'Frequency', 'Duration(days)', 'Reason', 'Date of Issue']
     return render_template('get_prescriptions.html', headers=headers, tableData=all_prescriptions, patientId=patient_id)
 
 

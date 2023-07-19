@@ -79,7 +79,7 @@
                     <th>Description</th>
                     <th>Dosage Amount</th>
                     <th>Frequency</th>
-                    <th>Duration</th>
+                    <th>Duration(days)</th>
                     <th>Reason</th>
                 </tr>
             </thead>
@@ -127,7 +127,7 @@
         }
 
         function redirectToViewPrescriptionPage() {
-            window.location.href = "http://127.0.0.1:5009/api/v1/getPrescriptions/{{patientId}}";
+            window.location.href = "http://127.0.0.1:5009/getPrescriptions/{{patientId}}";
         }
 
     </script>
