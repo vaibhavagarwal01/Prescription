@@ -1,28 +1,21 @@
-import calendar
-
-from flask import Flask, render_template, request, redirect, session, jsonify
-from werkzeug.utils import secure_filename
-from werkzeug.security import generate_password_hash, check_password_hash
-import secrets
+from flask import Flask, render_template, request, redirect
 import mysql.connector
 import configparser
 from datetime import date
+import calendar
 
-# It is used to get all the configurations from the 'config.txt' file
 configParser = configparser.RawConfigParser()
 configFilePath = r'config.txt'
 configParser.read(configFilePath)
 
-app = Flask(__name__)  # is used to create an instance of the Flask class.
+app = Flask(__name__)
 app.secret_key = configParser.get('My-Section', 'flask_secret_key')
 
 mydb = mysql.connector.connect(host=configParser.get('My-Section', 'db_host'),
                                user=configParser.get('My-Section', 'db_user'),
                                password=configParser.get('My-Section', 'db_password'),
                                database=configParser.get('My-Section', 'db_database'))
-
-print(mydb)  # used to check whether the database is connected or not
-mycursor = mydb.cursor()  # is used to create a cursor object for interacting with a database
+mycursor = mydb.cursor()
 
 
 @app.route('/')
@@ -30,51 +23,39 @@ def healthCheck():
     return 'Backend is working!'
 
 
-@app.route('/api/v1/create', methods=["POST"])
-def createPrescription():
-    input_json = request.get_json(force=True)
-    for object in input_json:
-        print(object)
+@app.route('/api/v1/create/<patient_id>', methods=["POST"])
+def createPrescription(patient_id):
+    data = request.form.to_dict(flat=False)
+    print(data)
+    for i in range(len(data['descriptions[]'])):
         prescriptions_date = date.today()
-        print(prescriptions_date)
         sql = "INSERT INTO prescriptions(PatientId, Description, Dosage, Frequency, Duration, Reason, DateOfIssue) " \
               "VALUES (%s, %s, %s, %s, %s, %s, %s)"
-        val = (object['patientId'], object['description'], object['dosage'], object['frequency'],
-               object['duration'], object['reason'], prescriptions_date)
+        val = (patient_id, data['descriptions[]'][i], data['dosage[]'][i], data['frequency[]'][i],
+               data['duration[]'][i], data['reason[]'][i], prescriptions_date)
         mycursor.execute(sql, val)
         mydb.commit()
-    dictToReturn = {"success": True,
-                    # "id": mycursor.lastrowid
-                    }
-    # returning the data in json format
-    return jsonify(dictToReturn)
+    return redirect(f"/api/v1/getPrescriptions/{patient_id}")
+
 
 @app.route('/create_prescription/<patient_id>', methods=["GET"])
 def createPrescriptionGet(patient_id):
     print(patient_id)
-    return render_template('create_prescription.html')
-
+    return render_template('create_prescription.html', patientId=patient_id)
 
 
 @app.route('/api/v1/getPatients', methods=["GET"])
 def getPatients():
     mycursor.execute("SELECT * FROM patients")
-    myresult = mycursor.fetchall()  # myresult is list of tuples
-    print(myresult)
+    result = mycursor.fetchall()
     all_patients = []
-    for x in myresult:
+    for x in result:
         print(x)
-        dict = {
+        patient = {
             "patient_id": x[0],
             "patient_name": x[1]
         }
-        all_patients.append(dict)
-    print(all_patients)
-    response = {
-        'success': True,
-        'data': all_patients
-    }
-    # return jsonify(response)
+        all_patients.append(patient)
     headers = ['Patient Id', 'Patient Name']
     return render_template('list_patients.html', headers=headers, tableData=all_patients)
 
@@ -83,35 +64,24 @@ def getPatients():
 def getPrescriptions(patient_id):
     args = request.args
     print(args)
-    sql = "SELECT Description, Dosage, Frequency, Duration, Reason, DateOfIssue from prescriptions where patientid = %s"
-    # val = (args.get('patientid'),)
-    val = (patient_id, )
-    print(type(val))
-    print(val)
+    sql = "SELECT Description, Dosage, Frequency, Duration, Reason, DateOfIssue from prescriptions " \
+          "where PatientId = %s"
+    val = (patient_id,)
     mycursor.execute(sql, val)
-    myresult = mycursor.fetchall()
+    result = mycursor.fetchall()
     all_prescriptions = []
-    for object in myresult:
-        print(object)
-        print(type(object[5]))
-        print(object[5])
+    for object in result:
         date_str = object[5].day
         month_num = object[5].month
         month_name_str = calendar.month_abbr[month_num]
-        date = f'{date_str} {month_name_str}'
-        dict = {'description': object[0],
-                'dosage': object[1],
-                'frequency': object[2],
-                'duration': object[3],
-                'reason': object[4],
-                'dateOfIssue': date
-                }
-        all_prescriptions.append(dict)
-    print(all_prescriptions)
-    response = {'success': True,
-                'data': all_prescriptions
-                }
-    # return jsonify(response)
+        date_of_issue = f'{date_str} {month_name_str}'
+        prescription = {'description': object[0],
+                        'dosage': object[1],
+                        'frequency': object[2],
+                        'duration': object[3],
+                        'reason': object[4],
+                        'dateOfIssue': date_of_issue}
+        all_prescriptions.append(prescription)
     headers = ['Description', 'Dosage', 'Frequency', 'Duration', 'Reason', 'Date of Issue']
     return render_template('get_prescriptions.html', headers=headers, tableData=all_prescriptions, patientId=patient_id)
 

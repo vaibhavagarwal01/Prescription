@@ -1,10 +1,136 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Create Prescription</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD"
+          crossorigin="anonymous">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        h2 {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        #prescriptionForm {
+            margin: 0 auto;
+            max-width: 1000px;
+        }
+
+        #prescriptionTable {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #prescriptionTable th,
+        #prescriptionTable td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        #prescriptionTable th {
+            background-color: #f2f2f2;
+        }
+
+        #prescriptionTable tbody tr:nth-child(odd) {
+            background-color: #f9f9f9;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        input[type="submit"] {
+            background-color: black;
+            color: white;
+            margin: 50px auto;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            display: block;
+            cursor: pointer;
+            border: none;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+    </style>
 </head>
 <body>
-    <h1>Hello World</h1>
+    <div class="text-center"><br><br><h2>Prescription Details</h2></div>
+    <br>
+    <form method="POST" action="/api/v1/create/{{patientId}}" id="prescriptionForm">
+        <table class="table table-striped table-bordered" id="prescriptionTable">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Dosage Amount</th>
+                    <th>Frequency</th>
+                    <th>Duration</th>
+                    <th>Reason</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <input type="text" name="descriptions[]" required>
+                    </td>
+                    <td>
+                        <input type="text" name="dosage[]" required>
+                    </td>
+                    <td>
+                        <input type="text" name="frequency[]" required>
+                    </td>
+                    <td>
+                        <input type="text" name="duration[]" required>
+                    </td>
+                    <td>
+                        <input type="text" name="reason[]" required>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </form>
+
+    <div class="text-center">
+        <button class="btn btn-primary" style="background-color: black; color: white; margin: 50px;" onclick="redirectToViewPrescriptionPage()">Cancel</button>
+        <button class="btn btn-primary" style="background-color: black; color: white; margin: 50px;" onclick="addRow()">Add Prescription</button>
+        <button class="btn btn-primary" type="submit" style="background-color: black; color: white; margin: 50px" form="prescriptionForm">Complete</button>
+    </div>
+
+    <script>
+        function addRow() {
+            const tableBody = document.querySelector("#prescriptionTable tbody");
+            const newRow = `
+                <tr>
+                    <td><input type="text" name="descriptions[]" required></td>
+                    <td><input type="text" name="dosage[]" required></td>
+                    <td><input type="text" name="frequency[]" required></td>
+                    <td><input type="text" name="duration[]" required></td>
+                    <td><input type="text" name="reason[]" required></td>
+                </tr>
+            `;
+            tableBody.insertAdjacentHTML("beforeend", newRow);
+        }
+
+        function redirectToViewPrescriptionPage() {
+            window.location.href = "http://127.0.0.1:5009/api/v1/getPrescriptions/{{patientId}}";
+        }
+
+    </script>
 </body>
 </html>
+
